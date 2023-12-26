@@ -1,0 +1,50 @@
+# Resources
+
+https://en.wikipedia.org/wiki/Evaluation_function
+
+https://stackoverflow.com/questions/17379849/simple-minimax-evaluation-function-for-chess-position
+
+https://www.pi.infn.it/~carosi/chess/shannon.tx://www.pi.infn.it/~carosi/chess/shannon.txt
+
+https://en.wikipedia.org/wiki/Negamax
+
+---------------------------------------------------------------------------------------------------
+
+# Program Flow
+PlayerMove() ---> EvaluatePosition() ---> ComputerMove()
+
+## Evaluate_Position() breakdown
+- Check all pieces that can be moved
+- For each piece, evaluate the strength of position
+  - if piece can move, recur down move tree and evaluate strength
+
+
+```
+function minimax(node, depth, maximizingPlayer) is
+    if depth = 0 or node is a terminal node then
+        return the heuristic value of node
+    if maximizingPlayer then
+        value := −∞
+        for each child of node do
+            value := max(value, minimax(child, depth − 1, FALSE))
+        return value
+    else (* minimizing player *)
+        value := +∞
+        for each child of node do
+            value := min(value, minimax(child, depth − 1, TRUE))
+        return value
+```
+
+
+Position Definitions: 
+WHITE_ADVANTAGE = 1
+NEUTRAL = 0
+BLACK_ADVANTAGE = -1
+
+
+### Edge Case Thoughts
+- Handling en passant
+
+
+
+

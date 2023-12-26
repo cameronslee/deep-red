@@ -1,0 +1,16 @@
+
+  computer_move()
+    move = sorted(explore_leaves(s, v), key=lambda x: x[0], reverse=s.board.turn)
+      
+      explore_leaves()
+        
+        computer_minimax() // evaluation hre
+        Params:
+          s
+          v
+          depth
+          a
+          b
+          big=False
+
+

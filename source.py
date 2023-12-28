@@ -1,9 +1,11 @@
 # Deep Red - Simple Chess Engine
 
 import chess
+import random
 
 move_number = 0
 MAX_VAL = 42069
+MAX_DEPTH = 3
 
 
 # State - Handle board state and legal moves
@@ -59,7 +61,7 @@ class Evaluator(object):
     total -= 0.1 * len(s.legal_moves())
 
     s.board.turn = temp
-
+    
     return total
 
 ### ====== Game State and Evaluator ======= ###
@@ -67,51 +69,49 @@ s = State()
 v = Evaluator()
 ### ======================================= ###
 
-
 # TODO can simplify into negamax 
-# White: Maximizing Player
-# Black: Minimizing Player
-# node is a move
-def minimax(s, depth, maximizingPlayer):
-  if depth == 0 or s.board.is_game_over():
+def minimax(s, depth, as_list=False):
+  res = []
+  if depth >= MAX_DEPTH or s.board.is_game_over():
     return v.eval(s) # position node
+
   curr_turn = s.board.turn
 
   if curr_turn == chess.WHITE:
     value = -MAX_VAL
-    '''
-    for child in s:
-      value = max(value, minimax(child, depth-1, chess.BLACK))
-    '''
-
   elif curr_turn == chess.BLACK:
     value = MAX_VAL
-    '''
-    for child in s:
-      value = min(value, minimax(child, depth-1, chess.WHITE))
-    '''
-
  
+  # collect moves that can be made in current position
   temp = []
-  for m in s.board.legal_moves:
-    s.board.push(m)
-    # evaluate current position
-    temp.append((v.eval(m), m))
+  for x in s.board.legal_moves:
+    s.board.push(x)
+    temp.append((v.eval(x), x))
     s.board.pop()
  
+  for m in [t[1] for t in temp]:
+    s.board.push(m)
+    print(s.board)
+    temp_val = minimax(s, depth+1)
+    s.board.pop()
 
-  print("Moves available: ", temp)
-
-  return temp
-
-  #return value
+    res.append((v.eval(m), m))
+    if s.board.turn == chess.WHITE:
+      for child in temp:
+        value = max(value, temp_val)
+    else:
+      for child in temp:
+        value = min(value, temp_val)
+  
+  if as_list:
+    return res, value
+  return value 
 
 ### ====== Move Functionality ====== ###
 
-# moves are in UCI notation
 def player_move(move):
   try:
-    print("Moving ", move)
+    print("Player Moving ", move)
     s.board.push_uci(str(move))
   except:
     print("error: invalid player movement")
@@ -119,15 +119,25 @@ def player_move(move):
 
 def computer_move():
   # build game tree
-  moves = minimax(s, 3, s.board.turn)
-  print(moves[0])
+  moves, value = minimax(s, 0, as_list=True)
+  
+  #moves = sorted(moves, key=lambda x: x[0], reverse=s.board.turn)
+  print(moves)
+  i = random.randint(0,len(moves))
+  move = moves[i][1]
+
+  try:
+    print("Computer Moving ", move)
+    s.board.push_uci(str(move))
+  except:
+    print("error: invalid computer movement")
   
   
+### ====== Driver ====== ###
 if __name__ == "__main__":
   running = True
   print("Welcome to Deep Red")
   print(s.board)
-  print(s.board.piece_map())
 
   while(running):
     if (move_number != 0):
@@ -138,3 +148,5 @@ if __name__ == "__main__":
     player_move(move)
     move_number += 1
     computer_move()
+
+

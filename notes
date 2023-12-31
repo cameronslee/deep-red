@@ -8,6 +8,8 @@ https://www.pi.infn.it/~carosi/chess/shannon.tx://www.pi.infn.it/~carosi/chess/s
 
 https://en.wikipedia.org/wiki/Negamax
 
+https://www.chessprogramming.org/Negamax
+
 https://www.chessprogramming.org/Quiescence_Searc://www.chessprogramming.org/Quiescence_Search
 
 https://en.wikipedia.org/wiki/Universal_Chess_Interface
@@ -48,7 +50,6 @@ BLACK_ADVANTAGE = -1
 
 ### Edge Case Thoughts
 - Handling en passant
-
 
 
 

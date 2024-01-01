@@ -1,12 +1,13 @@
 # Deep Red - Simple Chess Engine
-
 import chess
 import random
+
+from flask import Flask, Response, request
+app = Flask(__name__)
 
 move_number = 0
 MAX_VAL = 42069
 MAX_DEPTH = 3
-
 
 # State - Handle board state and legal moves
 class State(object):
@@ -112,7 +113,7 @@ def minimax(s, depth, as_list=False):
 def player_move(move):
   try:
     print("Player Moving ", move)
-    s.board.push_uci(str(move))
+    s.board.push_san(move)
   except:
     print("error: invalid player movement")
   
@@ -120,33 +121,63 @@ def player_move(move):
 def computer_move():
   # build game tree
   moves, value = minimax(s, 0, as_list=True)
-  
-  #moves = sorted(moves, key=lambda x: x[0], reverse=s.board.turn)
-  print(moves)
+  #print(moves)
   i = random.randint(0,len(moves))
   move = moves[i][1]
 
   try:
-    print("Computer Moving ", move)
-    s.board.push_uci(str(move))
+    print("Computer Moving ", s.board.san(move))
+    s.board.push_san(s.board.san(move))
   except:
     print("error: invalid computer movement")
   
-  
+
+### ====== SERVER SIDE ====== ###
+@app.route("/")
+def index():
+  ret = open("index.html").read()
+  return ret.replace('start', s.board.fen())
+
+@app.route("/move")
+def move():
+  if not s.board.is_game_over():
+    source = int(request.args.get('from', default=''))
+    target = int(request.args.get('to', default=''))
+    promotion = True if request.args.get('promotion', default='') == 'true' else False
+
+    move = s.board.san(chess.Move(source, target, promotion=chess.QUEEN if promotion else None))
+
+  if move is not None and move != "":
+    try:
+      player_move(move)
+      computer_move()
+    except Exception:
+      traceback.print_exc()
+    response = app.response_class(
+        response=s.board.fen(),
+        status=200
+        )
+    return response
+  else:
+    response = app.response_class(
+        response="game over",
+        status=200
+        )
+    return response
+  return index()
+
+@app.route("/newgame")
+def newgame():
+  s.board.reset()
+  response = app.response_class(
+    response=s.board.fen(),
+    status=200
+  )
+  return response
+
+
 ### ====== Driver ====== ###
 if __name__ == "__main__":
   running = True
   print("Welcome to Deep Red")
-  print(s.board)
-
-  while(running):
-    if (move_number != 0):
-      print(s.board)
-
-    move = input("Enter a move: ")
-    print(move)
-    player_move(move)
-    move_number += 1
-    computer_move()
-
-
+  app.run(debug=True, port=5001)
